@@ -32,7 +32,7 @@ import {
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { submitFeedback } from "../actions/feedback";
+import { submitFeedback } from "@/actions/feedback";
 import { course } from "generated/prisma";
 // Define the validation schema using Zod
 const formSchema = z.object({
