@@ -21,3 +21,5 @@ bun dev
 
 ## Screenshots
 ![Screenshot from 2025-04-29 12-01-15](https://github.com/user-attachments/assets/7f44bf0a-41cf-41d8-bfb7-94e04c062450)
+![image](https://github.com/user-attachments/assets/84aaafe6-f607-4d61-9b4a-a3a53407f234)
+
