@@ -13,3 +13,7 @@ pnpm dev
 # or
 bun dev
 ```
+
+
+## hosted url
+[Live](https://feedback-collection-for-online-courses.onrender.com)
