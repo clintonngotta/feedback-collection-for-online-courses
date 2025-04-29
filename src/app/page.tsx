@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
+import FeedbackFormComponent from "./components/FeedbackForm";
 
 export default function Home() {
-	return <Button variant='destructive'>Destructive</Button>;
+	return <FeedbackFormComponent />;
 }
