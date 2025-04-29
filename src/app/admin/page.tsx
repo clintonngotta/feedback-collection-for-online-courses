@@ -26,8 +26,6 @@ export default async function AdminPage() {
 		uniqueStudents,
 		courseWithMostFeedback,
 	} = await getFeedbackStats();
-	console.log("fedbackData", fedbackData);
-	console.log("courseWithMostFeedback:", courseWithMostFeedback);
 
 	return (
 		<ProtectedRoute>
