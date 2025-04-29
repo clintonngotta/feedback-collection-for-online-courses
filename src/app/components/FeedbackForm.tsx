@@ -34,6 +34,7 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { submitFeedback } from "@/actions/feedback";
 import { course } from "generated/prisma";
+import Link from "next/link";
 // Define the validation schema using Zod
 const formSchema = z.object({
 	name: z
@@ -46,6 +47,7 @@ const formSchema = z.object({
 		.string()
 		.min(10, { message: "Please provide at least 10 characters of feedback" })
 		.max(500, { message: "Comments must be less than 500 characters" }),
+	rating: z.string().min(1, { message: "Please select a rating" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -67,6 +69,7 @@ export default function FeedbackFormComponent({
 			email: "",
 			course: "",
 			comments: "",
+			rating: "",
 		},
 		mode: "onBlur", // Validate on blur for better UX
 	});
@@ -106,6 +109,9 @@ export default function FeedbackFormComponent({
 						<p className='mt-2 text-muted-foreground'>
 							Your feedback has been submitted successfully.
 						</p>
+						<Link href='/admin'>
+							<Button className='mt-4'>Dahsboard</Button>
+						</Link>
 					</CardContent>
 				) : (
 					<Form {...form}>
@@ -161,56 +167,76 @@ export default function FeedbackFormComponent({
 										</FormItem>
 									)}
 								/>
-
-								<FormField
-									control={form.control}
-									name='course'
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className='flex items-center gap-1'>
-												Course Taken
-												<span className='text-destructive'>*</span>
-											</FormLabel>
-											<Select
-												onValueChange={field.onChange}
-												defaultValue={field.value}>
-												<FormControl>
-													<SelectTrigger
-														className={
-															form.formState.errors.course
-																? "border-destructive"
-																: ""
-														}>
-														<SelectValue placeholder='Select a course' />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													{courses.map((course) => (
-														<SelectItem key={course.id} value={course.id}>
-															{course.name}
-														</SelectItem>
-													))}
-													{/* <SelectItem value='web-development'>
-														Web Development
-													</SelectItem>
-													<SelectItem value='data-science'>
-														Data Science
-													</SelectItem>
-													<SelectItem value='ui-design'>
-														UI/UX Design
-													</SelectItem>
-													<SelectItem value='mobile-dev'>
-														Mobile App Development
-													</SelectItem>
-													<SelectItem value='cloud-computing'>
-														Cloud Computing
-													</SelectItem> */}
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								<div className='flex flex-col gap-4 md:flex-row w-full'>
+									<FormField
+										control={form.control}
+										name='course'
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className='flex items-center gap-1'>
+													Course Taken
+													<span className='text-destructive'>*</span>
+												</FormLabel>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}>
+													<FormControl>
+														<SelectTrigger
+															className={
+																form.formState.errors.course
+																	? "border-destructive"
+																	: ""
+															}>
+															<SelectValue placeholder='Select a course' />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														{courses.map((course) => (
+															<SelectItem key={course.id} value={course.id}>
+																{course.name}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name='rating'
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className='flex items-center gap-1'>
+													Rating
+													<span className='text-destructive'>*</span>
+												</FormLabel>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}>
+													<FormControl>
+														<SelectTrigger
+															className={
+																form.formState.errors.course
+																	? "border-destructive"
+																	: ""
+															}>
+															<SelectValue placeholder='Select a course' />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value='1'>1 Star</SelectItem>
+														<SelectItem value='2'>2 Stars</SelectItem>
+														<SelectItem value='3'>3 Stars</SelectItem>
+														<SelectItem value='4'>4 Stars</SelectItem>
+														<SelectItem value='5'>5 Stars</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
 								<FormField
 									control={form.control}
 									name='comments'

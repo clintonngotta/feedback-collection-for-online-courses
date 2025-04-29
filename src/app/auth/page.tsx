@@ -26,6 +26,7 @@ import {
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
+import { useAuth } from "./auth-context";
 
 // Define the validation schema using Zod
 const formSchema = z.object({
@@ -38,7 +39,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
 	const [error, setError] = useState<string | null>(null);
+	const password = process.env.NEXT_PUBLIC_DEMO_LOGIN_PASSWORD;
+	const email = process.env.NEXT_PUBLIC_DEMO_EMAIL;
+
 	const router = useRouter();
+	const { login } = useAuth();
 	// Initialize React Hook Form
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -49,9 +54,10 @@ export default function LoginPage() {
 	});
 
 	// Handle form submission
-	const onSubmit = (data: FormValues) => {
+	const onSubmit = async (data: FormValues) => {
 		setError(null);
-		if (data.email === "admin@example.com" && data.password === "password123") {
+		if (data.email === email && data.password === password) {
+			login();
 			router.push("/admin");
 		} else {
 			setError("Invalid email or password. Please try again.");
@@ -128,9 +134,8 @@ export default function LoginPage() {
 										</FormControl>
 										<FormMessage />
 										<div className='text-xs text-muted-foreground'>
-											For demo: Use email{" "}
-											<p className='font-mono'>admin@example.com</p> and
-											password <p className='font-mono'>password123</p>
+											For demo: Use email <p className='font-mono'>{email}</p>{" "}
+											and password <p className='font-mono'>{password}</p>
 										</div>
 									</FormItem>
 								)}
@@ -140,7 +145,7 @@ export default function LoginPage() {
 						<CardFooter>
 							<Button
 								type='submit'
-								className='w-full'
+								className='w-full cursor-pointer'
 								disabled={form.formState.isSubmitting}>
 								{form.formState.isSubmitting ? "Logging in..." : "Login"}
 							</Button>
