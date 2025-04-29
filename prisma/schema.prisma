@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model feedback {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  email String
+  rating Int
+  comment String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt  
+  courseId String @db.ObjectId
+  course course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model user {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  email String
+  password String
+  role String
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt 
+}
+model course {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  description String
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt 
+  feedbacks feedback[]
+
+}
