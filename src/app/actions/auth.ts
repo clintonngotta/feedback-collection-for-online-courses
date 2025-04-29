@@ -13,7 +13,7 @@ export async function loginUser(formData: FormData) {
 	try {
 		const user = await prisma.user.findUnique({
 			where: {
-				email,
+				email: email,
 			},
 		});
 
@@ -46,6 +46,7 @@ export async function registerUser(formData: FormData) {
 				name,
 				email,
 				password,
+				role: "user", // Assign a default role or fetch it dynamically
 			},
 		});
 

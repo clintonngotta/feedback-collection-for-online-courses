@@ -19,9 +19,13 @@ export async function submitFeedback(formData: FormData) {
 			data: {
 				name,
 				email,
-				course,
+				course: {
+					connect: {
+						id: course,
+					},
+				},
 				rating: parseInt(rating || "0"),
-				comments,
+				comment: comments,
 			},
 		});
 		revalidatePath("/feedback");

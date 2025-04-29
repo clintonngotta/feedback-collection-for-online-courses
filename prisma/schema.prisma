@@ -22,8 +22,8 @@ model feedback {
 
 model user {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  email String
+  name String 
+  email String @unique 
   password String
   role String
   createdAt DateTime @default(now()) 
@@ -33,7 +33,7 @@ model course {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
   duration String
-  slug String?
+  slug String @unique
   description String
   createdAt DateTime @default(now()) 
   updatedAt DateTime @updatedAt 

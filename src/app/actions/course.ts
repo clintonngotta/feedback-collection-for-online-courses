@@ -50,7 +50,7 @@ export async function createCourse(formData: FormData) {
 			data: {
 				name,
 				description,
-				duration: parseInt(duration || "0"),
+				duration: duration,
 				slug: slug || name.replace(/\s+/g, "-").toLowerCase(),
 			},
 		});
@@ -59,4 +59,29 @@ export async function createCourse(formData: FormData) {
 		console.error("Error creating course:", error);
 		throw new Error("Failed to create course. Please try again later.");
 	}
+}
+
+export async function defaultCourses() {
+	await prisma.course.createMany({
+		data: [
+			{
+				name: "Fullstack Development with React",
+				description: "Learn fullstack development with React and Node.js",
+				duration: "6 months",
+				slug: "fullstack-development-with-react",
+			},
+			{
+				name: "backend development with Node.js",
+				description: "Learn backend development with Node.js and Express",
+				duration: "4 months",
+				slug: "backend-development-with-nodejs",
+			},
+			{
+				name: "database management with MongoDB",
+				description: "Learn database management with MongoDB and Mongoose",
+				duration: "3 months",
+				slug: "database-management-with-mongodb",
+			},
+		],
+	});
 }

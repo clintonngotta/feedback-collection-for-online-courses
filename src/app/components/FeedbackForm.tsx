@@ -10,7 +10,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -21,12 +20,73 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle } from "lucide-react";
 import { useState } from "react";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 
-export default function FeedbackFormComponent() {
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { submitFeedback } from "../actions/feedback";
+import { course } from "generated/prisma";
+// Define the validation schema using Zod
+const formSchema = z.object({
+	name: z
+		.string()
+		.min(2, { message: "Name must be at least 2 characters" })
+		.regex(/^[a-zA-Z\s'-]+$/, { message: "Name contains invalid characters" }),
+	email: z.string().email({ message: "Please enter a valid email address" }),
+	course: z.string().min(1, { message: "Please select a course" }),
+	comments: z
+		.string()
+		.min(10, { message: "Please provide at least 10 characters of feedback" })
+		.max(500, { message: "Comments must be less than 500 characters" }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+interface FeedbackFormComponentProps {
+	courses: course[];
+}
+
+export default function FeedbackFormComponent({
+	courses,
+}: FeedbackFormComponentProps) {
 	const [submitted, setSubmitted] = useState(false);
 
-	const handleSubmit = async () => {
+	// Initialize React Hook Form
+	const form = useForm<FormValues>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			name: "",
+			email: "",
+			course: "",
+			comments: "",
+		},
+		mode: "onBlur", // Validate on blur for better UX
+	});
+	// Get comments field value for character count
+	const commentsValue = form.watch("comments") || "";
+
+	const onSubmit = async (data: FormValues) => {
+		const formData = new FormData();
+		Object.entries(data).forEach(([key, value]) => {
+			formData.append(key, value);
+		});
+		await submitFeedback(formData);
 		setSubmitted(true);
+
+		console.log("Form submitted:", data);
+		// Reset form after 3 seconds
+		setTimeout(() => {
+			form.reset();
+			setSubmitted(false);
+		}, 3000);
 	};
 	return (
 		<div className='flex min-h-screen items-center justify-center bg-slate-50 p-4'>
@@ -35,7 +95,7 @@ export default function FeedbackFormComponent() {
 					<CardTitle className='text-2xl font-bold'>Course Feedback</CardTitle>
 					<CardDescription>
 						We value your feedback! Please share your thoughts on the course
-						you've taken.
+						you&apos;ve taken.
 					</CardDescription>
 				</CardHeader>
 
@@ -48,69 +108,160 @@ export default function FeedbackFormComponent() {
 						</p>
 					</CardContent>
 				) : (
-					<form onSubmit={handleSubmit}>
-						<CardContent className='space-y-4'>
-							<div className='space-y-2'>
-								<Label htmlFor='name'>Full Name</Label>
-								<Input
-									id='name'
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)}>
+							<CardContent className='space-y-4'>
+								<FormField
+									control={form.control}
 									name='name'
-									placeholder='Enter your full name'
-									required
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className='flex items-center gap-1'>
+												Full Name
+												<span className='text-destructive'>*</span>
+											</FormLabel>
+											<FormControl>
+												<Input
+													placeholder='Enter your full name'
+													{...field}
+													className={
+														form.formState.errors.name
+															? "border-destructive"
+															: ""
+													}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
 								/>
-							</div>
 
-							<div className='space-y-2'>
-								<Label htmlFor='email'>Email Address</Label>
-								<Input
-									id='email'
+								<FormField
+									control={form.control}
 									name='email'
-									type='email'
-									placeholder='your.email@example.com'
-									required
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className='flex items-center gap-1'>
+												Email Address
+												<span className='text-destructive'>*</span>
+											</FormLabel>
+											<FormControl>
+												<Input
+													type='email'
+													placeholder='your.email@example.com'
+													{...field}
+													className={
+														form.formState.errors.email
+															? "border-destructive"
+															: ""
+													}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
 								/>
-							</div>
 
-							<div className='space-y-2 '>
-								<Label htmlFor='course'>Course Taken</Label>
-								<Select defaultValue='web-development' required>
-									<SelectTrigger id='course'>
-										<SelectValue placeholder='Select a course' />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value='web-development'>
-											Web Development
-										</SelectItem>
-										<SelectItem value='data-science'>Data Science</SelectItem>
-										<SelectItem value='ui-design'>UI/UX Design</SelectItem>
-										<SelectItem value='mobile-dev'>
-											Mobile App Development
-										</SelectItem>
-										<SelectItem value='cloud-computing'>
-											Cloud Computing
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-
-							<div className='space-y-2'>
-								<Label htmlFor='comments'>Comments</Label>
-								<Textarea
-									id='comments'
+								<FormField
+									control={form.control}
+									name='course'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className='flex items-center gap-1'>
+												Course Taken
+												<span className='text-destructive'>*</span>
+											</FormLabel>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}>
+												<FormControl>
+													<SelectTrigger
+														className={
+															form.formState.errors.course
+																? "border-destructive"
+																: ""
+														}>
+														<SelectValue placeholder='Select a course' />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{courses.map((course) => (
+														<SelectItem key={course.id} value={course.id}>
+															{course.name}
+														</SelectItem>
+													))}
+													{/* <SelectItem value='web-development'>
+														Web Development
+													</SelectItem>
+													<SelectItem value='data-science'>
+														Data Science
+													</SelectItem>
+													<SelectItem value='ui-design'>
+														UI/UX Design
+													</SelectItem>
+													<SelectItem value='mobile-dev'>
+														Mobile App Development
+													</SelectItem>
+													<SelectItem value='cloud-computing'>
+														Cloud Computing
+													</SelectItem> */}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
 									name='comments'
-									placeholder='Please share your experience, suggestions, or any other feedback...'
-									rows={5}
-									required
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className='flex items-center gap-1'>
+												Comments
+												<span className='text-destructive'>*</span>
+											</FormLabel>
+											<FormControl>
+												<div className='space-y-1'>
+													<Textarea
+														placeholder='Please share your experience, suggestions, or any other feedback...'
+														rows={5}
+														{...field}
+														className={
+															form.formState.errors.comments
+																? "border-destructive"
+																: ""
+														}
+													/>
+													<div className='flex justify-end'>
+														<span
+															className={`text-xs ${
+																commentsValue.length > 500
+																	? "text-destructive"
+																	: "text-muted-foreground"
+															}`}>
+															{commentsValue.length}/500
+														</span>
+													</div>
+												</div>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
 								/>
-							</div>
-						</CardContent>
+							</CardContent>
 
-						<CardFooter className='mt-4'>
-							<Button type='submit' className='w-full'>
-								Submit Feedback
-							</Button>
-						</CardFooter>
-					</form>
+							<CardFooter>
+								<Button
+									type='submit'
+									className='w-full'
+									disabled={form.formState.isSubmitting}>
+									{form.formState.isSubmitting
+										? "Submitting..."
+										: "Submit Feedback"}
+								</Button>
+							</CardFooter>
+						</form>
+					</Form>
 				)}
 			</Card>
 		</div>
