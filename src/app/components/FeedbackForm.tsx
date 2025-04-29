@@ -25,7 +25,7 @@ import { useState } from "react";
 export default function FeedbackFormComponent() {
 	const [submitted, setSubmitted] = useState(false);
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		setSubmitted(true);
 	};
 	return (

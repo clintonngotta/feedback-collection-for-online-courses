@@ -12,7 +12,7 @@ model feedback {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
   email String
-  rating Int
+  rating Int?
   comment String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt  
@@ -32,6 +32,8 @@ model user {
 model course {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
+  duration String
+  slug String?
   description String
   createdAt DateTime @default(now()) 
   updatedAt DateTime @updatedAt 
